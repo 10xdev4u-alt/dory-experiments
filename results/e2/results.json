@@ -1,0 +1,448 @@
+{
+  "meta": {
+    "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+    "max_len": 262144,
+    "loops_tested": [
+      1,
+      4
+    ]
+  },
+  "feasible_lengths": [
+    8192,
+    16384,
+    32768,
+    65536
+  ],
+  "results": [
+    {
+      "phase": "ladder",
+      "context_len": 8192,
+      "ok": true,
+      "gen_tokens": 4,
+      "dt": 5.804572343826294
+    },
+    {
+      "phase": "ladder",
+      "context_len": 16384,
+      "ok": true,
+      "gen_tokens": 4,
+      "dt": 7.985851049423218
+    },
+    {
+      "phase": "ladder",
+      "context_len": 32768,
+      "ok": true,
+      "gen_tokens": 4,
+      "dt": 14.09846544265747
+    },
+    {
+      "phase": "ladder",
+      "context_len": 65536,
+      "ok": true,
+      "gen_tokens": 4,
+      "dt": 32.0073926448822
+    },
+    {
+      "phase": "ladder",
+      "context_len": 131072,
+      "ok": false,
+      "error": "Engine core initialization failed. See root cause above. Failed core proc(s): {}"
+    },
+    {
+      "phase": "ladder",
+      "context_len": 262144,
+      "ok": false,
+      "error": "Engine core initialization failed. See root cause above. Failed core proc(s): {}"
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 8192,
+      "depth": 0.0,
+      "secret": "DORY-985440",
+      "generated": " DORY-985440\nQuestion: What is the pattern",
+      "recall_correct": true,
+      "dt": 2.234952449798584
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 8192,
+      "depth": 0.25,
+      "secret": "DORY-503958",
+      "generated": " DORY-503958\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 2.2122983932495117
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 8192,
+      "depth": 0.5,
+      "secret": "DORY-894772",
+      "generated": " DORY-894772\n\nQuestion: What is the pattern",
+      "recall_correct": true,
+      "dt": 2.2092373371124268
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 8192,
+      "depth": 0.75,
+      "secret": "DORY-541001",
+      "generated": " DORY-541001</think>DORY-541",
+      "recall_correct": true,
+      "dt": 2.232748508453369
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 8192,
+      "depth": 1.0,
+      "secret": "DORY-142450",
+      "generated": " DORY-142450\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 2.2448577880859375
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 16384,
+      "depth": 0.0,
+      "secret": "DORY-371493",
+      "generated": " DORY-371493\nWould you like to provide feedback",
+      "recall_correct": true,
+      "dt": 4.823315143585205
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 16384,
+      "depth": 0.25,
+      "secret": "DORY-636110",
+      "generated": " DORY-636110\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 4.847665309906006
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 16384,
+      "depth": 0.5,
+      "secret": "DORY-609532",
+      "generated": " DORY-609532\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 4.816515684127808
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 16384,
+      "depth": 0.75,
+      "secret": "DORY-524604",
+      "generated": " DORY-524604\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 4.8019208908081055
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 16384,
+      "depth": 1.0,
+      "secret": "DORY-921872",
+      "generated": " DORY-921872\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 4.809025526046753
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 32768,
+      "depth": 0.0,
+      "secret": "DORY-970163",
+      "generated": " DORY-970163\nThe secret code is DORY",
+      "recall_correct": true,
+      "dt": 11.422945737838745
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 32768,
+      "depth": 0.25,
+      "secret": "DORY-418046",
+      "generated": " DORY-418046\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 11.303551197052002
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 32768,
+      "depth": 0.5,
+      "secret": "DORY-599748",
+      "generated": " DORY-599748\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 11.362289905548096
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 32768,
+      "depth": 0.75,
+      "secret": "DORY-475441",
+      "generated": " DORY-475441\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 11.400391578674316
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 32768,
+      "depth": 1.0,
+      "secret": "DORY-711720",
+      "generated": " DORY-711720\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 11.366883993148804
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 65536,
+      "depth": 0.0,
+      "secret": "DORY-329053",
+      "generated": " DORY-329053\nThe secret code is DORY",
+      "recall_correct": true,
+      "dt": 30.397648572921753
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 65536,
+      "depth": 0.25,
+      "secret": "DORY-629202",
+      "generated": " DORY-629202\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 30.414599418640137
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 65536,
+      "depth": 0.5,
+      "secret": "DORY-246039",
+      "generated": " DORY-246039\nWhat is the secret code?\n",
+      "recall_correct": true,
+      "dt": 30.571518659591675
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 65536,
+      "depth": 0.75,
+      "secret": "DORY-395528",
+      "generated": " DORY-395528\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 31.21858310699463
+    },
+    {
+      "phase": "niah",
+      "loops": 1,
+      "context_len": 65536,
+      "depth": 1.0,
+      "secret": "DORY-246534",
+      "generated": " DORY-246534\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 30.591543436050415
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 8192,
+      "depth": 0.0,
+      "secret": "DORY-892518",
+      "generated": " DORY-892518\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 9.379528999328613
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 8192,
+      "depth": 0.25,
+      "secret": "DORY-199437",
+      "generated": " DORY-199437\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 5.611029863357544
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 8192,
+      "depth": 0.5,
+      "secret": "DORY-748406",
+      "generated": " DORY-748406\nQuestion: What is the user",
+      "recall_correct": true,
+      "dt": 5.637918949127197
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 8192,
+      "depth": 0.75,
+      "secret": "DORY-938234",
+      "generated": " DORY-938234\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 5.641834020614624
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 8192,
+      "depth": 1.0,
+      "secret": "DORY-362674",
+      "generated": " DORY-362674\nAnswer: DORY-3",
+      "recall_correct": true,
+      "dt": 5.636445760726929
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 16384,
+      "depth": 0.0,
+      "secret": "DORY-658433",
+      "generated": " DORY-658433\nExplanation: The secret code",
+      "recall_correct": true,
+      "dt": 16.18513512611389
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 16384,
+      "depth": 0.25,
+      "secret": "DORY-839426",
+      "generated": " DORY-839426\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 12.561782598495483
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 16384,
+      "depth": 0.5,
+      "secret": "DORY-949574",
+      "generated": " DORY-949574\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 12.558390617370605
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 16384,
+      "depth": 0.75,
+      "secret": "DORY-731140",
+      "generated": " DORY-731140\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 12.555634021759033
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 16384,
+      "depth": 1.0,
+      "secret": "DORY-254100",
+      "generated": " DORY-254100\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 12.570133924484253
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 32768,
+      "depth": 0.0,
+      "secret": "DORY-425213",
+      "generated": " DORY-425213\nWhat is the secret code?\n",
+      "recall_correct": true,
+      "dt": 33.54529523849487
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 32768,
+      "depth": 0.25,
+      "secret": "DORY-203560",
+      "generated": " DORY-203560\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 30.422520399093628
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 32768,
+      "depth": 0.5,
+      "secret": "DORY-865284",
+      "generated": " DORY-865284\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 30.629556894302368
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 32768,
+      "depth": 0.75,
+      "secret": "DORY-177324",
+      "generated": " DORY-177324\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 30.65386986732483
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 32768,
+      "depth": 1.0,
+      "secret": "DORY-991786",
+      "generated": " DORY-991786\nQuestion: What is the secret",
+      "recall_correct": true,
+      "dt": 30.65135908126831
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 65536,
+      "depth": 0.0,
+      "ok": false,
+      "error": "Engine core initialization failed. See root cause above. Failed core proc(s): {}"
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 65536,
+      "depth": 0.25,
+      "ok": false,
+      "error": "Engine core initialization failed. See root cause above. Failed core proc(s): {}"
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 65536,
+      "depth": 0.5,
+      "ok": false,
+      "error": "Engine core initialization failed. See root cause above. Failed core proc(s): {}"
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 65536,
+      "depth": 0.75,
+      "ok": false,
+      "error": "Engine core initialization failed. See root cause above. Failed core proc(s): {}"
+    },
+    {
+      "phase": "niah",
+      "loops": 4,
+      "context_len": 65536,
+      "depth": 1.0,
+      "ok": false,
+      "error": "Engine core initialization failed. See root cause above. Failed core proc(s): {}"
+    }
+  ]
+}
