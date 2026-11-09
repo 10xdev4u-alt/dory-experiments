@@ -150,6 +150,12 @@ class TransformersBackend(BaseBackend):
     def __init__(self, model_name: str, max_new_tokens: int = 128):
         try:
             import torch
+            try:
+                import transformers.configuration_utils as _cu
+                if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
+                    _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
+            except Exception:
+                pass
             from transformers import AutoModelForCausalLM, AutoTokenizer
         except Exception as exc:  # pragma: no cover - runtime dependency
             raise RuntimeError(

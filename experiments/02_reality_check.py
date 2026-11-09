@@ -5,6 +5,13 @@ import argparse, gc, json, math, os, random, sys, time
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Tuple
 import torch
+# Kaggle transformers (>=4.5x) rejects Dory's 'mlp' entries in layer_types; allow them.
+try:
+    import transformers.configuration_utils as _cu
+    if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
+        _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
+except Exception:
+    pass
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 LADDER = [8192, 16384, 32768, 65536, 131072, 262144]

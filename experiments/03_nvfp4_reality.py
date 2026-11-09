@@ -151,6 +151,12 @@ def weight_bytes(model):
             + sum(b.numel() * b.element_size() for _, b in model.named_buffers()))
 
 def load_model(model_id, device, dtype, quant):
+    try:
+        import transformers.configuration_utils as _cu
+        if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
+            _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
+    except Exception:
+        pass
     from transformers import AutoModelForCausalLM, AutoTokenizer
     tok = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
     if tok.pad_token_id is None and tok.eos_token_id is not None:

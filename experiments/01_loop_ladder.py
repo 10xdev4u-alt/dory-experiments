@@ -16,6 +16,13 @@ import torch
 MODEL_ID = "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16"
 
 def load_model(loops, device="cuda:0"):
+    # Kaggle transformers (>=4.5x) rejects Dory's 'mlp' entries in layer_types; allow them.
+    try:
+        import transformers.configuration_utils as _cu
+        if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
+            _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
+    except Exception:
+        pass
     from transformers import AutoModelForCausalLM, AutoTokenizer
     tok = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(
