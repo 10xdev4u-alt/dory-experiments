@@ -174,6 +174,11 @@ class TransformersBackend(BaseBackend):
     def generate(self, prompt: str, loop: int, max_new_tokens: int = 128) -> str:
         # Deterministic greedy decode. Loop count is injected as a controlled prefix
         # to exercise iterative prompting/regression sensitivity with the same model.
+        # Apply Dory recurrent loop count to the model when supported.
+        if hasattr(self.model, "config") and hasattr(self.model.config, "n_recurrent_loops"):
+            self.model.config.n_recurrent_loops = int(loop)
+        if hasattr(self.model, "set_num_loops"):
+            self.model.set_num_loops(int(loop))
         loop_prompt = (
             f"You are on refinement loop {loop}. Follow instructions exactly.\n"
             f"Previous refinement passes: {max(0, loop - 1)}.\n\n{prompt}"
