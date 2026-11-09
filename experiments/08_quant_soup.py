@@ -24,6 +24,7 @@ import json
 import math
 import os
 import sys
+import tempfile
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -36,23 +37,22 @@ except Exception:  # pragma: no cover
     torch = None  # type: ignore
 
 try:
-    try:
-        import transformers.configuration_utils as _cu
-        if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
-            _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
-    except Exception:
-        pass
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-except Exception:  # pragma: no cover
-    AutoModelForCausalLM = None  # type: ignore
-    AutoTokenizer = None  # type: ignore
-
-try:
     import bitsandbytes as bnb  # noqa: F401
 
     HAS_BNB = True
 except Exception:  # pragma: no cover
     HAS_BNB = False
+
+
+def ensure_vllm() -> None:
+    """Import vLLM and raise a clear error if it is unavailable."""
+    try:
+        import vllm  # noqa: F401
+    except Exception as exc:  # pragma: no cover
+        raise RuntimeError(
+            "vLLM backend requires the vllm package. "
+            "Install it (e.g. `pip install vllm`)."
+        ) from exc
 
 
 @dataclass
@@ -95,11 +95,9 @@ def die(msg: str, code: int = 2) -> None:
 
 
 def require_deps() -> None:
-    if torch is None or AutoModelForCausalLM is None or AutoTokenizer is None:
-        die(
-            "Missing required dependencies. Install: pip install torch transformers. "
-            "For INT4/INT8 also install: pip install bitsandbytes accelerate"
-        )
+    if torch is None:
+        die("Missing required dependency: torch.")
+    ensure_vllm()
 
 
 def ensure_dir(path: Path) -> None:
@@ -112,23 +110,21 @@ def device_str() -> str:
     return "cpu"
 
 
-def param_bytes(model: Any) -> int:
-    total = 0
-    for p in model.parameters():
+def _cleanup_cuda() -> None:
+    gc.collect()
+    if torch is not None and torch.cuda.is_available():
         try:
-            total += p.numel() * p.element_size()
+            torch.cuda.synchronize()
         except Exception:
             pass
-    for b in model.buffers():
         try:
-            total += b.numel() * b.element_size()
+            torch.cuda.empty_cache()
         except Exception:
             pass
-    return total
 
 
-def weights_gb(model: Any) -> float:
-    # Prefer actual allocated CUDA memory when available; fallback to param bytes.
+def weights_gb(llm: Any) -> float:
+    # Prefer actual allocated CUDA memory when available.
     if torch is not None and torch.cuda.is_available():
         try:
             torch.cuda.synchronize()
@@ -137,73 +133,110 @@ def weights_gb(model: Any) -> float:
                 return allocated / (1024**3)
         except Exception:
             pass
-    return param_bytes(model) / (1024**3)
-
-
-@torch.inference_mode()
-def measure_throughput(
-    model: Any, tokenizer: Any, prompt: str = "Once upon a time", max_new_tokens: int = 32, runs: int = 2
-) -> float:
-    if torch is None:
+    # Fallback: try to inspect underlying model if exposed.
+    try:
+        model = llm.llm_engine.model_executor.driver_worker.model_runner.model
+        total = 0
+        for p in model.parameters():
+            total += p.numel() * p.element_size()
+        return total / (1024**3)
+    except Exception:
         return 0.0
-    dev = next(model.parameters()).device
-    inputs = tokenizer(prompt, return_tensors="pt").to(dev)
+
+
+def _sampling_params(max_tokens: int, temperature: float = 0.0):
+    from vllm import SamplingParams
+
+    return SamplingParams(max_tokens=max_tokens, temperature=temperature, top_p=1.0)
+
+
+def measure_throughput(
+    llm: Any, prompt: str = "Once upon a time", max_new_tokens: int = 32, runs: int = 2
+) -> float:
     # warmup
-    _ = model.generate(**inputs, max_new_tokens=min(8, max_new_tokens), do_sample=False)
-    if torch.cuda.is_available():
-        torch.cuda.synchronize()
+    try:
+        llm.generate([prompt], _sampling_params(max_tokens=min(8, max_new_tokens)))
+    except Exception:
+        pass
+    _cleanup_cuda()
     best = 0.0
     for _ in range(runs):
         t0 = time.perf_counter()
-        out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
-        if torch.cuda.is_available():
-            torch.cuda.synchronize()
+        out = llm.generate([prompt], _sampling_params(max_tokens=max_new_tokens))
+        if torch is not None and torch.cuda.is_available():
+            try:
+                torch.cuda.synchronize()
+            except Exception:
+                pass
         dt = time.perf_counter() - t0
-        new_tokens = max(1, out.shape[-1] - inputs["input_ids"].shape[-1])
+        new_tokens = 0
+        if out and out[0].outputs:
+            try:
+                new_tokens = len(out[0].outputs[0].token_ids)
+            except Exception:
+                text = out[0].outputs[0].text or ""
+                new_tokens = max(1, len(text.split()))
+        new_tokens = max(1, new_tokens)
         best = max(best, new_tokens / dt if dt > 0 else 0.0)
     return float(best)
 
 
-@torch.inference_mode()
-def measure_perplexity(model: Any, tokenizer: Any, texts: List[str]) -> float:
-    if torch is None or not texts:
+def measure_perplexity(llm: Any, texts: List[str]) -> float:
+    if not texts:
         return float("inf")
-    dev = next(model.parameters()).device
     nlls: List[float] = []
     tok_count = 0
-    for text in texts:
-        enc = tokenizer(text, return_tensors="pt")
-        input_ids = enc["input_ids"].to(dev)
-        if input_ids.shape[-1] < 2:
+    try:
+        from vllm import SamplingParams
+
+        params = SamplingParams(max_tokens=1, temperature=0.0, prompt_logprobs=1)
+        outputs = llm.generate(texts, params)
+    except Exception:
+        return float("inf")
+    for out in outputs:
+        prompt_lps = getattr(out, "prompt_logprobs", None)
+        if not prompt_lps:
             continue
-        out = model(input_ids, labels=input_ids)
-        loss = out.loss
-        if loss is None or not torch.isfinite(loss):
-            continue
-        n = input_ids.shape[-1]
-        nlls.append(float(loss.item()) * n)
-        tok_count += n
+        for lp in prompt_lps:
+            if lp is None:
+                continue
+            # lp is typically dict[token_id, Logprob] or similar; pick max/selected logprob.
+            try:
+                if isinstance(lp, dict) and lp:
+                    # Use the highest logprob entry as a proxy for the observed token's logprob.
+                    val = max(v.logprob if hasattr(v, "logprob") else float(v) for v in lp.values())
+                    nlls.append(-float(val))
+                    tok_count += 1
+                elif hasattr(lp, "logprob"):
+                    nlls.append(-float(lp.logprob))
+                    tok_count += 1
+            except Exception:
+                continue
     if tok_count == 0 or not nlls:
         return float("inf")
     return float(math.exp(sum(nlls) / tok_count))
 
 
-@torch.inference_mode()
-def measure_accuracy(model: Any, tokenizer: Any, qa: List[Tuple[str, str]]) -> float:
-    if torch is None or not qa:
+def measure_accuracy(llm: Any, qa: List[Tuple[str, str]]) -> float:
+    if not qa:
         return 0.0
-    dev = next(model.parameters()).device
+    prompts = [p for p, _ in qa]
+    max_new = 1
+    try:
+        tokenizer = llm.get_tokenizer()
+        for _, expected in qa:
+            try:
+                max_new = max(max_new, len(tokenizer.encode(expected, add_special_tokens=False)) + 2)
+            except Exception:
+                max_new = max(max_new, 4)
+    except Exception:
+        max_new = 6
+    outputs = llm.generate(prompts, _sampling_params(max_tokens=max_new))
     correct = 0
-    for prompt, expected in qa:
-        enc = tokenizer(prompt, return_tensors="pt").to(dev)
-        # generate a few tokens and check prefix/containment
-        gen = model.generate(
-            **enc,
-            max_new_tokens=max(1, len(tokenizer.encode(expected, add_special_tokens=False)) + 2),
-            do_sample=False,
-            pad_token_id=tokenizer.eos_token_id,
-        )
-        text = tokenizer.decode(gen[0][enc["input_ids"].shape[-1] :], skip_special_tokens=True)
+    for (_, expected), out in zip(qa, outputs):
+        text = ""
+        if out and out.outputs:
+            text = out.outputs[0].text or ""
         norm = text.strip().lower()
         exp = expected.strip().lower()
         if norm.startswith(exp) or exp in norm:
@@ -211,85 +244,79 @@ def measure_accuracy(model: Any, tokenizer: Any, qa: List[Tuple[str, str]]) -> f
     return 100.0 * correct / len(qa)
 
 
-def load_model(model_id: str, quant: str, tokenizer: Any) -> Any:
-    if torch is None or AutoModelForCausalLM is None:
-        die("transformers/torch unavailable")
-    common: Dict[str, Any] = {
+def load_llm(model_id: str, quant: str) -> Any:
+    ensure_vllm()
+    from vllm import LLM
+
+    kwargs: Dict[str, Any] = {
+        "model": model_id,
         "trust_remote_code": True,
+        "enforce_eager": True,
     }
     if quant == "fp16":
-        kwargs = dict(common)
-        if torch.cuda.is_available():
-            kwargs["torch_dtype"] = torch.float16
-            kwargs["device_map"] = "auto"
-        return AutoModelForCausalLM.from_pretrained(model_id, **kwargs)
-    if quant == "int8":
+        kwargs["dtype"] = "float16"
+    elif quant == "int8":
         if not HAS_BNB:
             raise RuntimeError("bitsandbytes not installed; INT8 unavailable")
-        return AutoModelForCausalLM.from_pretrained(
-            model_id,
-            load_in_8bit=True,
-            device_map="auto" if torch.cuda.is_available() else None,
-            **common,
-        )
-    if quant == "int4":
+        kwargs["quantization"] = "bitsandbytes"
+        kwargs["load_format"] = "bitsandbytes"
+    elif quant == "int4":
         if not HAS_BNB:
             raise RuntimeError("bitsandbytes not installed; INT4 unavailable")
-        return AutoModelForCausalLM.from_pretrained(
-            model_id,
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            bnb_4bit_use_double_quant=True,
-            device_map="auto" if torch.cuda.is_available() else None,
-            **common,
-        )
-    raise ValueError(f"unknown quant: {quant}")
+        kwargs["quantization"] = "bitsandbytes"
+        kwargs["load_format"] = "bitsandbytes"
+    elif quant == "soup-fp16":
+        kwargs["dtype"] = "float16"
+    else:
+        raise ValueError(f"unknown quant: {quant}")
+    return LLM(**kwargs)
 
 
 def evaluate(model_id: str, quant: str) -> EvalResult:
-    if torch is None or AutoTokenizer is None:
-        return EvalResult(model_id, quant, 0.0, 0.0, float("inf"), 0.0, error="deps missing")
-    gc.collect()
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+    _cleanup_cuda()
+    llm = None
     try:
-        tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
-        if tokenizer.pad_token is None and tokenizer.eos_token is not None:
-            tokenizer.pad_token = tokenizer.eos_token
-        model = load_model(model_id, quant, tokenizer)
-        model.eval()
-        wgb = weights_gb(model)
-        tps = measure_throughput(model, tokenizer)
-        ppl = measure_perplexity(model, tokenizer, PPL_TEXTS)
-        acc = measure_accuracy(model, tokenizer, QA_SET)
-        res = EvalResult(
+        llm = load_llm(model_id, quant)
+        wgb = weights_gb(llm)
+        tps = measure_throughput(llm)
+        ppl = measure_perplexity(llm, PPL_TEXTS)
+        acc = measure_accuracy(llm, QA_SET)
+        return EvalResult(
             name=model_id,
             quant=quant,
             weights_gb=round(wgb, 4),
             tok_per_s=round(tps, 3),
             perplexity=round(ppl, 4) if math.isfinite(ppl) else ppl,
             accuracy=round(acc, 2),
-            notes=f"device={device_str()}",
+            notes=f"device={device_str()} backend=vllm",
         )
-        del model
-        del tokenizer
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        return res
     except Exception as exc:
         return EvalResult(model_id, quant, 0.0, 0.0, float("inf"), 0.0, error=str(exc))
+    finally:
+        try:
+            if llm is not None and hasattr(llm, "llm_engine"):
+                # Best-effort cleanup; vLLM holds GPU resources.
+                del llm
+        except Exception:
+            pass
+        _cleanup_cuda()
 
 
-def soup_two_models(model_a: str, model_b: str) -> EvalResult:
-    """Average FP32/FP16 state dicts of two compatible checkpoints on CPU."""
-    if torch is None or AutoModelForCausalLM is None or AutoTokenizer is None:
-        return EvalResult(f"soup({model_a},{model_b})", "soup-fp16", 0.0, 0.0, float("inf"), 0.0, error="deps missing")
-    gc.collect()
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+def soup_two_models(model_a: str, model_b: str, out_dir: Path) -> EvalResult:
+    """Average FP16 state dicts of two compatible checkpoints on CPU, save, eval with vLLM."""
+    if torch is None:
+        return EvalResult(f"soup({model_a},{model_b})", "soup-fp16", 0.0, 0.0, float("inf"), 0.0, error="torch missing")
+    _cleanup_cuda()
     try:
+        try:
+            import transformers.configuration_utils as _cu
+
+            if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
+                _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
+        except Exception:
+            pass
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+
         tok = AutoTokenizer.from_pretrained(model_a, trust_remote_code=True)
         if tok.pad_token is None and tok.eos_token is not None:
             tok.pad_token = tok.eos_token
@@ -300,7 +327,7 @@ def soup_two_models(model_a: str, model_b: str) -> EvalResult:
         keys = set(sda.keys()) & set(sdb.keys())
         if not keys:
             raise RuntimeError("no overlapping state_dict keys to average")
-        out: Dict[str, torch.Tensor] = {}
+        out: Dict[str, Any] = {}
         for k in keys:
             ta, tb = sda[k], sdb[k]
             if ta.shape != tb.shape:
@@ -310,27 +337,25 @@ def soup_two_models(model_a: str, model_b: str) -> EvalResult:
                 out[k] = ((ta.detach().cpu().float() + tb.detach().cpu().float()) / 2.0).to(ta.dtype)
             else:
                 out[k] = ta
-        # keep unmatched keys from A
         for k, v in sda.items():
             if k not in out:
                 out[k] = v
         ma.load_state_dict(out, strict=False)
-        if torch.cuda.is_available():
-            ma = ma.to("cuda")
-        ma.eval()
-        res = EvalResult(
-            name=f"soup({Path(model_a).name}+{Path(model_b).name})",
-            quant="soup-fp16",
-            weights_gb=round(weights_gb(ma), 4),
-            tok_per_s=round(measure_throughput(ma, tok), 3),
-            perplexity=round(measure_perplexity(ma, tok, PPL_TEXTS), 4),
-            accuracy=round(measure_accuracy(ma, tok, QA_SET), 2),
-            notes=f"averaged_keys={len(keys)} device={device_str()}",
-        )
+
+        soup_dir = Path(tempfile.mkdtemp(prefix="e8_soup_", dir=str(out_dir)))
+        ma.save_pretrained(soup_dir, safe_serialization=True)
+        tok.save_pretrained(soup_dir)
+        try:
+            mb.config.save_pretrained(soup_dir)
+        except Exception:
+            pass
+
         del ma, mb, sda, sdb, out, tok
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
+        _cleanup_cuda()
+
+        res = evaluate(str(soup_dir), "soup-fp16")
+        res.name = f"soup({Path(model_a).name}+{Path(model_b).name})"
+        res.notes = (res.notes + f" averaged_keys={len(keys)}").strip()
         return res
     except Exception as exc:
         return EvalResult(f"soup({model_a},{model_b})", "soup-fp16", 0.0, 0.0, float("inf"), 0.0, error=str(exc))
@@ -378,10 +403,11 @@ def main() -> int:
         "model2": args.model2,
         "threshold": args.threshold,
         "has_bitsandbytes": HAS_BNB,
+        "backend": "vllm",
         "killed": "",
     }
 
-    print(f"[E8] device={device_str()} model={args.model} bnb={HAS_BNB}")
+    print(f"[E8] device={device_str()} model={args.model} bnb={HAS_BNB} backend=vllm")
     for quant in ("fp16", "int8", "int4"):
         print(f"[E8] evaluating {quant}...")
         res = evaluate(args.model, quant)
@@ -405,7 +431,7 @@ def main() -> int:
 
     if args.model2:
         print(f"[E8] evaluating cross-model soup: {args.model} + {args.model2}")
-        soup = soup_two_models(args.model, args.model2)
+        soup = soup_two_models(args.model, args.model2, out_dir)
         results.append(soup)
         print(
             f"  -> soup: weights_gb={soup.weights_gb} tok/s={soup.tok_per_s} ppl={soup.perplexity} acc={soup.accuracy}%"

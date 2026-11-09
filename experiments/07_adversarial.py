@@ -204,54 +204,47 @@ class MockBackend(BaseBackend):
         return " ".join(rng.choice(["stable", "drift", "loop", "token"]) for _ in range(10 + loop * 8))
 
 
-class TransformersBackend(BaseBackend):
-    name = "transformers"
+def ensure_vllm() -> None:
+    """Import vLLM and raise a clear error if it is unavailable."""
+    try:
+        import vllm  # noqa: F401
+    except Exception as exc:  # pragma: no cover
+        raise RuntimeError(
+            "vLLM backend requires the vllm package. "
+            "Install it (e.g. `pip install vllm`) or run without --model to use the mock backend."
+        ) from exc
+
+
+class VLLMBackend(BaseBackend):
+    name = "vllm"
 
     def __init__(self, model_name: str, max_new_tokens: int = 128):
-        try:
-            import torch
-            try:
-                import transformers.configuration_utils as _cu
-                if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
-                    _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
-            except Exception:
-                pass
-            from transformers import AutoModelForCausalLM, AutoTokenizer
-        except Exception as exc:  # pragma: no cover
-            raise RuntimeError(
-                "Transformers backend requires transformers and torch. "
-                "Install them or run without --model to use the mock backend."
-            ) from exc
-        self.torch = torch
+        ensure_vllm()
+        from vllm import LLM, SamplingParams
+
         self.max_new_tokens = max_new_tokens
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
-        self.model.eval()
-        if self.tokenizer.pad_token_id is None and self.tokenizer.eos_token_id is not None:
-            self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+        self.llm = LLM(model=model_name, trust_remote_code=True)
+        self.SamplingParams = SamplingParams
 
     def generate(self, prompt: str, loop: int, max_new_tokens: int = 128) -> str:
         loop_prompt = (
             f"Adversarial refinement loop {loop}. Be robust and follow safety/format constraints.\n"
             f"Prior passes: {max(0, loop - 1)}.\n\n{prompt}"
         )
-        inputs = self.tokenizer(loop_prompt, return_tensors="pt", truncation=True, max_length=2048)
-        with self.torch.no_grad():
-            out = self.model.generate(
-                **inputs,
-                do_sample=False,
-                num_beams=1,
-                max_new_tokens=max_new_tokens,
-                pad_token_id=self.tokenizer.pad_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
-            )
-        gen_ids = out[0][inputs["input_ids"].shape[1]:]
-        return self.tokenizer.decode(gen_ids, skip_special_tokens=True).strip()
+        params = self.SamplingParams(
+            max_tokens=max_new_tokens,
+            temperature=0.0,
+            top_p=1.0,
+        )
+        outputs = self.llm.generate([loop_prompt], params)
+        if not outputs or not outputs[0].outputs:
+            return ""
+        return outputs[0].outputs[0].text.strip()
 
 
 def build_backend(args: argparse.Namespace) -> BaseBackend:
     if args.model:
-        return TransformersBackend(args.model, max_new_tokens=args.max_new_tokens)
+        return VLLMBackend(args.model, max_new_tokens=args.max_new_tokens)
     return MockBackend()
 
 
@@ -429,7 +422,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--out", default="e7_adversarial_output", help="Output directory for JSON and markdown summary")
     parser.add_argument("--loops", type=int, default=4, help="Maximum loop count to test (starts at 1)")
     parser.add_argument("--limit", type=int, default=0, help="Limit total cases (0 means all, ~300)")
-    parser.add_argument("--model", default=None, help="Transformers model name/path; if omitted uses mock backend")
+    parser.add_argument("--model", default=None, help="vLLM model name/path; if omitted uses mock backend")
     parser.add_argument("--max-new-tokens", type=int, default=128, help="Max new tokens for generation")
     args = parser.parse_args(argv)
     if args.loops < 1:
