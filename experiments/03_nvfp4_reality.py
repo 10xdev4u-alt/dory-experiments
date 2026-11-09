@@ -50,6 +50,7 @@ def ensure_vllm() -> None:
 
         return
     except ImportError:
+        os.environ["VLLM_USE_PRECOMPILED"] = "1"
         log(f"vLLM not found; installing {VLLM_REF}")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", VLLM_REF])
 

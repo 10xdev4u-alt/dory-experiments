@@ -48,11 +48,11 @@ def ensure_vllm() -> None:
     """Import vLLM and raise a clear error if it is unavailable."""
     try:
         import vllm  # noqa: F401
-    except Exception as exc:  # pragma: no cover
-        raise RuntimeError(
-            "vLLM backend requires the vllm package. "
-            "Install it (e.g. `pip install vllm`)."
-        ) from exc
+    except Exception:  # pragma: no cover
+        import os, subprocess, sys
+        os.environ["VLLM_USE_PRECOMPILED"] = "1"
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-q",
+                               "git+https://github.com/vllm-project/vllm.git@refs/pull/60149/head"])
 
 
 @dataclass
