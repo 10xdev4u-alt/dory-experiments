@@ -383,7 +383,7 @@ def parse_args():
     p.add_argument("--limit", type=int, default=100, help="Prompts per dataset (stratify)")
     p.add_argument("--max-tokens-math", type=int, default=512, dest="max_tokens_math")
     p.add_argument("--max-tokens-bbh", type=int, default=256, dest="max_tokens_bbh")
-    p.add_argument("--model", default="Qwen/Qwen2.5-3B", help="vLLM model path / HF id")
+    p.add_argument("--model", default="nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16", help="vLLM model path / HF id")
     return p.parse_args()
 
 
