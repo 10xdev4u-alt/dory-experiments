@@ -33,8 +33,11 @@ def peak_vram():
     return torch.cuda.max_memory_allocated() / 1e9
 
 def gen(model, tok, prompt, max_new_tokens=256, loops=None):
-    if loops is not None and hasattr(model.config, "n_recurrent_loops"):
-        model.config.n_recurrent_loops = loops
+    if loops is not None:
+        if hasattr(model.config, "n_recurrent_loops"):
+            model.config.n_recurrent_loops = loops
+        if hasattr(model, "set_num_loops"):
+            model.set_num_loops(loops)
     inputs = tok(prompt, return_tensors="pt").to(model.device)
     t0 = time.time()
     with torch.inference_mode():
@@ -57,8 +60,10 @@ def main():
     ap.add_argument("--loops", nargs="+", type=int, default=[1,2,3,4])
     ap.add_argument("--max-tokens", type=int, default=256)
     ap.add_argument("--limit", type=int, default=50, help="per-dataset cap for lap speed")
+    ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
     out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
+    torch.manual_seed(args.seed)
 
     # Tiny mixed suite (self-contained, no network needed beyond model download)
     suite = []
@@ -81,14 +86,19 @@ def main():
         model, tok = load_model(L)
         rows = []
         for i, ex in enumerate(suite):
-            text, ntok, dt = gen(model, tok, ex["prompt"], args.max_tokens, L)
-            ok = ex["gold"].lower() in text.lower()
+            try:
+                text, ntok, dt = gen(model, tok, ex["prompt"], args.max_tokens, L)
+            except RuntimeError as e:
+                print(f"  OOM/ERR at i={i}: {str(e).splitlines()[0][:120]}", flush=True)
+                gc.collect(); torch.cuda.empty_cache()
+                text, ntok, dt = "", 0, 0.0
+            ok = ex["gold"].lower() in text.lower() if text else False
             rows.append({"i":i, "task":ex["task"], "loops":L, "ok":ok,
-                        "ntok":ntok, "dt":dt, "toks":ntok/max(dt,1e-6),
+                        "ntok":ntok, "dt":dt, "toks":(ntok/max(dt,1e-6)) if dt>0 else 0.0,
                         "peak_gb":peak_vram(), "rep":rep_rate(text),
-                        "out":text[:200]})
+                        "out":text[:200], "error": None if text else "oom_or_error"})
             if i % 10 == 0:
-                print(f"  {i}/{len(suite)} ok={ok} toks={ntok} {ntok/max(dt,1e-6):.1f}t/s peak={peak_vram():.2f}GB", flush=True)
+                print(f"  {i}/{len(suite)} ok={ok} toks={ntok} peak={peak_vram():.2f}GB", flush=True)
         (out / f"loops_{L}.json").write_text(json.dumps(rows, indent=2))
         all_rows.extend(rows)
         del model; gc.collect(); torch.cuda.empty_cache()
@@ -120,5 +130,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-EOF
-echo written

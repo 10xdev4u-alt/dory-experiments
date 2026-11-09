@@ -67,14 +67,27 @@ def print_budget(model, config, dtype):
 def make_prompt_ids(ctx, device):
     return torch.randint(10, 50000, (1,ctx), device=device, dtype=torch.long)
 
-def prefill_probe(model, ids, device):
+def chunked_prefill(model, ids, device, chunk=4096):
+    """Prefill in chunks to avoid materializing the full seq x seq attention matrix."""
     if device.startswith("cuda"):
         torch.cuda.reset_peak_memory_stats(device); torch.cuda.synchronize(device)
-    t0=time.perf_counter(); _=model(input_ids=ids, use_cache=False)
+    t0=time.perf_counter()
+    past=None; last=None
+    L=ids.shape[1]
+    for st in range(0, L, chunk):
+        sl=ids[:, st:min(st+chunk, L)]
+        with torch.inference_mode():
+            out=model(input_ids=sl, past_key_values=past, use_cache=True)
+        past=getattr(out, "past_key_values", past)
+        last=out
     if device.startswith("cuda"): torch.cuda.synchronize(device)
     dt=max(time.perf_counter()-t0,1e-9)
     peak=bytes_to_gb(torch.cuda.max_memory_allocated(device)) if device.startswith("cuda") else 0.0
-    return dt, ids.shape[1]/dt, peak
+    return dt, L/dt, peak, past, last
+
+def prefill_probe(model, ids, device):
+    dt,tps,peak,past,last=chunked_prefill(model, ids, device)
+    return dt, tps, peak
 
 def build_niah(tok, ctx, depth):
     random.seed(42); secret=f"DORY-{random.randint(100000,999999)}"
@@ -94,30 +107,26 @@ def build_niah(tok, ctx, depth):
 @torch.no_grad()
 def niah_run(model, tok, text, secret, device, gentok):
     enc=tok(text, return_tensors="pt", add_special_tokens=True)
-    ids=enc["input_ids"].to(device); attn=enc.get("attention_mask")
-    if attn is not None: attn=attn.to(device)
+    ids=enc["input_ids"].to(device)
     plen=ids.shape[1]
     if device.startswith("cuda"):
         torch.cuda.reset_peak_memory_stats(device); torch.cuda.synchronize(device)
-    t0=time.perf_counter(); out=model(input_ids=ids, attention_mask=attn, use_cache=True)
-    if device.startswith("cuda"): torch.cuda.synchronize(device)
+    t0=time.perf_counter()
+    dt,tps,peak,past,last=chunked_prefill(model, ids, device)
     t1=time.perf_counter(); prefill_s=max(t1-t0,1e-9)
-    past=getattr(out,"past_key_values",None)
-    cur=torch.argmax(out.logits[:,-1,:],dim=-1,keepdim=True)
+    cur=torch.argmax(last.logits[:,-1,:],dim=-1,keepdim=True)
     gens=[cur]
     if device.startswith("cuda"): torch.cuda.synchronize(device)
     t_first=time.perf_counter()
-    ca=attn
     for _ in range(max(0,gentok-1)):
-        if ca is not None: ca=torch.cat([ca,torch.ones((1,1),device=device,dtype=ca.dtype)],dim=1)
-        step=model(input_ids=cur, attention_mask=ca, past_key_values=past, use_cache=True)
+        step=model(input_ids=cur, past_key_values=past, use_cache=True)
         past=getattr(step,"past_key_values",past)
         cur=torch.argmax(step.logits[:,-1,:],dim=-1,keepdim=True)
         gens.append(cur)
         if tok.eos_token_id is not None and int(cur.item())==int(tok.eos_token_id): break
     if device.startswith("cuda"): torch.cuda.synchronize(device)
     gen_text=tok.decode(torch.cat(gens,dim=1)[0], skip_special_tokens=True)
-    peak=bytes_to_gb(torch.cuda.max_memory_allocated(device)) if device.startswith("cuda") else 0.0
+    peak=peak if device.startswith("cuda") else 0.0
     return {"prefill_s":prefill_s,"prefill_tok_s":plen/prefill_s,"ttft_s":max(t_first-t0,1e-9),
             "peak_vram_gb":peak,"generated":gen_text.strip(),"recall_correct":secret.lower() in gen_text.lower(),
             "prompt_len":plen}
@@ -189,5 +198,3 @@ def main():
     print(f"\nSaved {args.out}\nFeasible: {feasible}")
 
 if __name__=="__main__": main()
-EOF
-echo written
