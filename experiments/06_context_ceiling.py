@@ -101,7 +101,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="E6 context ceiling / NIAH experiment")
     parser.add_argument(
         "--out",
-        default="/tmp/dory-experiments/results/e6_context_ceiling.json",
+        default="results/e6_context_ceiling.json",
         help="Output JSON path (markdown written alongside).",
     )
     parser.add_argument(
