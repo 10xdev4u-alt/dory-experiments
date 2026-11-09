@@ -292,6 +292,7 @@ def run_loop(n_loops: int, items, args, checkpoint_path: Path):
         model=args.model,
         hf_overrides={"n_recurrent_loops": n_loops, "recurrent_kv_cache_mode": "last_loop"},
         gpu_memory_utilization=0.90,
+        max_model_len=8192,
         trust_remote_code=True,
     )
     sp_math = SamplingParams(temperature=0, max_tokens=args.max_tokens_math)
