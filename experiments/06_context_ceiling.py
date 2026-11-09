@@ -23,29 +23,21 @@ from typing import Any
 
 
 def ensure_vllm() -> None:
-    """Ensure vLLM is importable in the current environment.
-
-    This is a best-effort helper for experiment runners that may execute in a
-    prepared virtualenv. It does not install packages automatically unless the
-    environment explicitly requests it via E6_AUTO_INSTALL_VLLM=1.
-    """
+    os.environ.setdefault('VLLM_USE_PRECOMPILED', '1')
     try:
         import vllm  # noqa: F401
-
         return
-    except Exception as exc:  # pragma: no cover - environment dependent
-        if os.environ.get("E6_AUTO_INSTALL_VLLM") == "1":
-            import subprocess
-
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "vllm"])
-            import vllm  # noqa: F401
-
-            return
-        raise RuntimeError(
-            "vLLM is not importable. Activate the experiment environment or set "
-            "E6_AUTO_INSTALL_VLLM=1."
-        ) from exc
-
+    except ImportError:
+        pass
+    try:
+        import subprocess
+        subprocess.check_call(
+            [sys.executable, '-m', 'pip', 'install', '--quiet', 'vllm'],
+            env={**os.environ, 'VLLM_USE_PRECOMPILED': '1'},
+        )
+    except Exception as exc:
+        raise RuntimeError(f'vLLM is not available and install failed: {exc}') from exc
+    import vllm  # noqa: F401
 
 @dataclass
 class RunConfig:
