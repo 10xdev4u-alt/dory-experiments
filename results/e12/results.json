@@ -1,0 +1,43 @@
+{
+  "checkpoint": "results/e5/checkpoints.jsonl",
+  "backend": "pure_python",
+  "features": [
+    "log_len",
+    "digit_density",
+    "math_symbol",
+    "question_marks",
+    "task_type"
+  ],
+  "summary": {
+    "n": 200,
+    "n_escalation": 17,
+    "escalation_rate": 0.085,
+    "classifier_accuracy": 0.565,
+    "misroute_rate": 0.435,
+    "false_escalation_rate": 0.39,
+    "missed_escalation_rate": 0.045,
+    "net_accuracy_router": 0.475,
+    "oracle_capture_pct": 47.05882352941176,
+    "baseline_loop2_accuracy": 0.46,
+    "baseline_loop4_accuracy": 0.465,
+    "oracle_accuracy": 0.545,
+    "confusion": {
+      "tp": 8,
+      "fp": 78,
+      "fn": 9,
+      "tn": 105
+    },
+    "cv_folds": 5
+  },
+  "coefficients": {
+    "log_len": 0.16145848932264226,
+    "digit_density": 0.053439065227622734,
+    "math_symbol": -0.36766757439318765,
+    "question_marks": 0.26416632957547287,
+    "task_type": -0.6566917330323533
+  },
+  "family_counts": {
+    "gsm8k": 100,
+    "math": 100
+  }
+}
