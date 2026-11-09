@@ -42,6 +42,24 @@
 - 10–16h: E6 distill (only if E1 shows real oracle gap) + E7
 - 16–20h: write-up with negative results
 
+## Revised plan after E1/E2/E3 (team debate)
+
+### Key findings
+- E1 saturated (accuracy 1.0 on 50 trivial prompts) → no oracle headroom; do not kill E4 yet. Rescope to hard benchmark (E5).
+- E2 feasible context only up to 64K (128K/256K OOM). Treat as config bug first: `last_loop` + `--max-model-len=target` + chunked prefill + `enforce_eager`. 256K likely needs PP=2 or SWA-aware KV.
+- E3 failed due vLLM/torch incompatibility and pip conflicts. NVFP4 unsupported on T4 (SM7.5). Quantization deferred until pinned env.
+
+### New waves
+- Wave 2 (hours 6-10): E5 hard-loop benchmark (GSM8K/MATH/BBH, 300 prompts, loops 1/2/4) + 60-prompt pilot first.
+- Wave 3 (hours 10-14): E6 context ceiling (32K/64K/128K, last_loop vs per_loop, KV diagnostic) + E5b adversarial loop regression.
+- Wave 4 (hours 14-18): E7 T4 quant ladder (FP16/INT8/INT4) with pinned vLLM + plugin, TinyLlama gate first.
+- Wave 5 (hours 18-20): E4 router only if E5 oracle gain >=3pt and router captures >=50%; else document heuristic.
+
+### Gates (updated)
+- G1 (E5): hard-subset oracle gain <3pt (CI excludes >4pt) → kill E4.
+- G2 (E6): 128K still OOM with last_loop + target max-len + chunked prefill + enforce_eager → ceiling is 64K.
+- G3 (E7): INT4 drop >5pt or bnb fails → kill INT4; use FP16 or GGUF/llama.cpp.
+
 ## Success criteria
 - A defensible loop-scaling curve (accuracy vs loops) with oracle gap.
 - A measured max context on 2×T4 with last-loop KV caching.
