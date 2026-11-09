@@ -128,7 +128,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default=os.environ.get("E6_MODEL", os.environ.get("MODEL", "")),
+        default=os.environ.get("E6_MODEL", os.environ.get("MODEL", "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16")),
         help="Model path/name for vLLM.",
     )
     parser.add_argument(
