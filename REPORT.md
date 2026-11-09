@@ -74,7 +74,13 @@ Rerun failed: max_model_len set equal to context (no output-token headroom) → 
 
 All modes failed: `TypeError: Config() got an unexpected keyword argument 'deprecated'` (vLLM/transformers version mismatch). NVFP4 confirmed false on T4. Environmental blocker; pin vLLM env before retry.
 
-## 8. Conclusions & Recommendations
+## 8. E8 — Confidence-Gated Escalation
+
+Confidence-gated (prompt-length heuristic median split) escalation: 99/200 escalated, net accuracy 0.2300 vs static loop2 0.2250 (+0.005) and oracle 0.3350. Marginal gain; not yet compelling. Better confidence signal (self-consistency samples) needed.
+
+## 9. E5 Taxonomy
+
+Loop regression is 100% format degradation (31/31 degraded): GSM8K answer repeated past cut → last-number extractor samples post-answer noise (mean 8.0 numbers after target); MATH \boxed{} lost in 7/13. Content accuracy flat (126→131 present). Improved cases (22) are mostly extraction lottery (19/22). Mitigation: answer-position-aware extraction, stop sequences.
 
 1. **Loop count:** 2 loops is a reasonable default; 4 loops degrades quality but raises oracle headroom. Router viable (oracle gain +11pt).
 2. **Context:** 64K ceiling on T4; 128K/256K need PP=2 or SWA-aware KV + INT8/GGUF.
