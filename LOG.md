@@ -7,3 +7,4 @@ Ends:    Tue 2026-11-10 04:39 IST
 - 08:39 IST — Repo created, pushed, plan written. Team spawned. Wave 1 starting.
 - $(date '+%Y-%m-%d %H:%M IST') — Patched transformers compat for Dory 'mlp' layer_types. Pushed E1 kernel v3. Added E3/E4/E5/E7/E8/E9 + REPORT.md. PR #10 updated.
 - 2026-11-09 10:42 IST — E1 kernel still running (vLLM install/model). Lap in progress.
+- 2026-11-09 11:10 IST — E1 complete (results committed). E2 kernel running.
