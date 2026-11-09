@@ -45,6 +45,10 @@ Ceiling = 64K on single T4. last_loop mode required to keep KV loop-invariant.
 
 NVFP4 unsupported on T4 (SM7.5); tensor-core dequant requires Blackwell (SM100+). Quantization via vLLM bitsandbytes failed due to pip/torch conflicts. Defer; pivot to FP16/INT8 on working stack.
 
+## 4b. E4 — Difficulty Router
+
+E4 router (logistic regression on 5 prompt features, 5-fold CV) on E5 data: classifier acc 0.530, misroute 0.470, net accuracy 0.220 vs static loop2 0.225. Oracle capture 63.6% but net does NOT beat static (fails kill criterion: net < 0.280). Crouton critique recommends confidence-gated escalation (run loop2, escalate on low self-consistency). Spec in research/e4_router_spec.md; critique in research/e4_router_critique.md.
+
 ## 5. E5 — Hard-Loop Benchmark
 
 200 prompts (GSM8K/MATH-500/BBH, 100 each, limit 100), loops 2 vs 4, greedy.
