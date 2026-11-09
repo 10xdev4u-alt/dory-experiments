@@ -1,0 +1,51 @@
+{
+  "checkpoint": "results/e5/checkpoints.jsonl",
+  "backend": "pure_python",
+  "features": [
+    "prompt_len_chars",
+    "token_count_est",
+    "has_equal",
+    "has_plus",
+    "has_digit",
+    "has_math_marker",
+    "family_gsm8k",
+    "family_math",
+    "family_bbh"
+  ],
+  "summary": {
+    "n": 200,
+    "n_escalation": 22,
+    "escalation_rate": 0.11,
+    "classifier_accuracy": 0.53,
+    "misroute_rate": 0.47,
+    "false_escalation_rate": 0.43,
+    "missed_escalation_rate": 0.04,
+    "net_accuracy_router": 0.22,
+    "oracle_capture_pct": 63.63636363636363,
+    "baseline_loop2_accuracy": 0.225,
+    "baseline_loop4_accuracy": 0.18,
+    "oracle_accuracy": 0.335,
+    "confusion": {
+      "tp": 14,
+      "fp": 86,
+      "fn": 8,
+      "tn": 92
+    },
+    "cv_folds": 5
+  },
+  "coefficients": {
+    "prompt_len_chars": -2.692654179465302,
+    "token_count_est": 2.541789235369102,
+    "has_equal": -0.16308745693898538,
+    "has_plus": -0.8163513463272383,
+    "has_digit": 0.020600767004135087,
+    "has_math_marker": 0.020600767004135087,
+    "family_gsm8k": -0.14179300392384847,
+    "family_math": 0.14179300392384847,
+    "family_bbh": 0.0
+  },
+  "family_counts": {
+    "gsm8k": 100,
+    "math": 100
+  }
+}
