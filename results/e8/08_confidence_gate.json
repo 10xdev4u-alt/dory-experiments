@@ -1,0 +1,1823 @@
+{
+  "experiment": "E8 confidence-gated escalation",
+  "checkpoint": "results/e5/checkpoints.jsonl",
+  "threshold": 0.5,
+  "confidence_method": "prompt_length_heuristic (median split: 1.0 if len(question) <= median else 0.0)",
+  "loop1_available": false,
+  "family_counts": {
+    "gsm8k": 100,
+    "math": 100
+  },
+  "summary": {
+    "n": 200,
+    "n_escalated": 99,
+    "escalation_rate": 0.495,
+    "net_accuracy_gated": 0.23,
+    "static_loop2_accuracy": 0.225,
+    "static_loop4_accuracy": 0.18,
+    "oracle_accuracy": 0.335,
+    "gated_correct": 46
+  },
+  "decisions": [
+    {
+      "idx": 0,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 1,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 2,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 3,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 4,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 5,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 6,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 7,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 8,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 9,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 10,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 11,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 12,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 13,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 14,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 15,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 16,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 17,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 18,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 19,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 20,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 21,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 22,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 23,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 24,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 25,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 26,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 27,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 28,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 29,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 30,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 31,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 32,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 33,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 34,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 35,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 36,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 37,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 38,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 39,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 40,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 41,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 42,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 43,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 44,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 45,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 46,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 47,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 48,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 49,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 50,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 51,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 52,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 53,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 54,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 55,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 56,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 57,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 58,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 59,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 60,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 61,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 62,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 63,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 64,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 65,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 66,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 67,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 68,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 69,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 70,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 71,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 72,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 73,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 74,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 75,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 76,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 77,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 78,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 79,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 80,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 81,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 82,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 83,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 84,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 85,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 86,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 87,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 88,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 89,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 90,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 91,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 92,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 93,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 94,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 95,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 96,
+      "dataset": "gsm8k",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 97,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 98,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 99,
+      "dataset": "gsm8k",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 100,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 101,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 102,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 103,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 104,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 105,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 106,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 107,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 108,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 109,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 110,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 111,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 112,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 113,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 114,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 115,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 116,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 117,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 118,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 119,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 120,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 121,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 122,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 123,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 124,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 125,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 126,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 127,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 128,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 129,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 130,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 131,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 132,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 133,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 134,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 135,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 136,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 137,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 138,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 139,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 140,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 141,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 142,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 143,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 144,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 145,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 146,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 147,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 148,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 149,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 150,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 151,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 152,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 153,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 154,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 155,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 156,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": false
+    },
+    {
+      "idx": 157,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 158,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 159,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 160,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 161,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 162,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 163,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 164,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 165,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 166,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 167,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 168,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 169,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 170,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 171,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 172,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 173,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 174,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 175,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 176,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 177,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 178,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 179,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 180,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 181,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 182,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 183,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 184,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 185,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 186,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 187,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 188,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": true,
+      "loop4_correct": true,
+      "chosen_correct": true
+    },
+    {
+      "idx": 189,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 190,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 191,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 192,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 193,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": true,
+      "loop4_correct": false,
+      "chosen_correct": true
+    },
+    {
+      "idx": 194,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 195,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 196,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 197,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 198,
+      "dataset": "math",
+      "confidence": 1.0,
+      "escalated": false,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    },
+    {
+      "idx": 199,
+      "dataset": "math",
+      "confidence": 0.0,
+      "escalated": true,
+      "loop2_correct": false,
+      "loop4_correct": false,
+      "chosen_correct": false
+    }
+  ]
+}
