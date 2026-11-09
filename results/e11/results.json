@@ -1,0 +1,391 @@
+{
+  "checkpoint_path": "results/e5/checkpoints.jsonl",
+  "num_records": 400,
+  "loops": [
+    2,
+    4
+  ],
+  "datasets": [
+    "gsm8k",
+    "math"
+  ],
+  "original_accuracy": {
+    "overall": {
+      "2": 0.225,
+      "4": 0.18
+    },
+    "per_dataset": {
+      "2": {
+        "gsm8k": 0.26,
+        "math": 0.19
+      },
+      "4": {
+        "gsm8k": 0.21,
+        "math": 0.15
+      }
+    }
+  },
+  "reextracted_accuracy": {
+    "overall": {
+      "2": 0.46,
+      "4": 0.465
+    },
+    "per_dataset": {
+      "2": {
+        "gsm8k": 0.66,
+        "math": 0.26
+      },
+      "4": {
+        "gsm8k": 0.62,
+        "math": 0.31
+      }
+    }
+  },
+  "degraded_total": 31,
+  "degraded_recovered_by_reextraction": 20,
+  "degraded_target_present_in_output": 30,
+  "degraded_extraction_artifacts": 30,
+  "degraded_cases": [
+    {
+      "dataset": "gsm8k",
+      "idx": 4,
+      "target": "20",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "20.",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 14,
+      "target": "60",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "60%",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 19,
+      "target": "6",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "1",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 28,
+      "target": "25",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "25",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 29,
+      "target": "104",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "104.",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 30,
+      "target": "109",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "109.",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 35,
+      "target": "9",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "9",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 44,
+      "target": "20",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "20.00.",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 49,
+      "target": "30",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "30.",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 51,
+      "target": "5",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "5",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 55,
+      "target": "14",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "14.",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 65,
+      "target": "36",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "36",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 73,
+      "target": "255",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "2%",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 74,
+      "target": "88",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "2",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 75,
+      "target": "60",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "60",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 80,
+      "target": "10",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "10",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 85,
+      "target": "44",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "34",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "gsm8k",
+      "idx": 99,
+      "target": "58",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "58.",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 120,
+      "target": "6+9i",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "6+9i$`",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 129,
+      "target": "225",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "225",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 140,
+      "target": "12",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "12",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 145,
+      "target": "2",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "2$",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 147,
+      "target": "5",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "0",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 154,
+      "target": "0.15",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "A",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 155,
+      "target": "3",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "3$",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 165,
+      "target": "1",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "1$",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 166,
+      "target": "x^3+3x-6",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "0",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": false,
+      "extraction_artifact": false
+    },
+    {
+      "dataset": "math",
+      "idx": 179,
+      "target": "2",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "2\\",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 186,
+      "target": "240",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "240",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 187,
+      "target": "1",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "1",
+      "reextracted_loop4_correct": true,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    },
+    {
+      "dataset": "math",
+      "idx": 193,
+      "target": "33",
+      "original_loop2_correct": true,
+      "original_loop4_correct": false,
+      "reextracted_loop4": "0",
+      "reextracted_loop4_correct": false,
+      "target_present_in_loop4_output": true,
+      "extraction_artifact": true
+    }
+  ]
+}
