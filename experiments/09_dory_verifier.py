@@ -2,13 +2,14 @@
 """E9: Dory-as-verifier self-consistency.
 
 Uses Dory at loops 1-4 to generate candidate answers, then uses Dory as a
-verifier scoring each candidate (yes/no verification prompt scored by
-log-likelihood). Compares:
+verifier scoring each candidate (yes/no verification prompt). Compares:
   - self-consistency (majority vote over normalized candidates)
-  - verifier-selected (highest P(yes) / yes-no log-likelihood margin)
+  - verifier-selected (highest P(yes) / yes-no logprob margin)
   - single 4-loop (or max loop) baseline
 
-Deterministic greedy decoding throughout.
+Deterministic greedy decoding throughout. vLLM backend with hf_overrides
+for loop count. Verification uses generated yes/no with logprobs when
+available, with prompt-text fallback.
 
 Usage:
   python experiments/09_dory_verifier.py --model nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16 \
@@ -24,147 +25,178 @@ import math
 import os
 import random
 import re
+import subprocess
+import sys
 import time
-from collections import Counter, defaultdict
-from pathlib import Path
+from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence, Tuple
-
-import torch
 
 
 DEFAULT_MODEL = "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16"
 
 
 # -----------------------------
-# Model loading / loop control
+# vLLM backend
 # -----------------------------
 
-def set_loop_count(model: Any, loops: int) -> None:
-    """Best-effort loop count setter for Dory-style recurrent models."""
-    if hasattr(model, "config") and hasattr(model.config, "n_recurrent_loops"):
-        model.config.n_recurrent_loops = loops
-    if hasattr(model, "set_num_loops"):
-        model.set_num_loops(loops)
-    # Some implementations expose generation/forward config variants.
-    if hasattr(model, "model") and hasattr(model.model, "config"):
-        cfg = model.model.config
-        if hasattr(cfg, "n_recurrent_loops"):
-            cfg.n_recurrent_loops = loops
-
-
-def load_model(model_id: str, loops: int, device: str = "cuda:0") -> Tuple[Any, Any]:
+def ensure_vllm() -> None:
     try:
-        import transformers.configuration_utils as _cu
-        if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
-            _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
+        import vllm  # noqa: F401
+        return
     except Exception:
-        pass
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-
-    tok = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
-    if tok.pad_token_id is None and tok.eos_token_id is not None:
-        tok.pad_token_id = tok.eos_token_id
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16,
-        device_map={"": device} if torch.cuda.is_available() else None,
-        trust_remote_code=True,
-        low_cpu_mem_usage=True,
-    )
-    set_loop_count(model, loops)
-    model.eval()
-    return model, tok
-
-
-# -----------------------------
-# Generation / scoring
-# -----------------------------
-
-def greedy_generate(
-    model: Any,
-    tok: Any,
-    prompt: str,
-    max_new_tokens: int,
-    loops: Optional[int] = None,
-) -> Dict[str, Any]:
-    if loops is not None:
-        set_loop_count(model, loops)
-    inputs = tok(prompt, return_tensors="pt")
-    inputs = {k: v.to(model.device) for k, v in inputs.items()}
-    t0 = time.time()
-    with torch.inference_mode():
-        out = model.generate(
-            **inputs,
-            max_new_tokens=max_new_tokens,
-            do_sample=False,
-            num_beams=1,
-            pad_token_id=tok.pad_token_id,
-            eos_token_id=tok.eos_token_id,
+        os.environ["VLLM_USE_PRECOMPILED"] = "1"
+        subprocess.check_call(
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "-q",
+                "git+https://github.com/vllm-project/vllm.git@refs/pull/60149/head",
+            ]
         )
-    dt = time.time() - t0
-    prompt_len = inputs["input_ids"].shape[1]
-    gen_ids = out[0][prompt_len:]
-    text = tok.decode(gen_ids, skip_special_tokens=True).strip()
-    return {"text": text, "ntok": int(gen_ids.shape[0]), "dt": dt}
 
 
-def token_logprob_for_completion(model: Any, tok: Any, prompt: str, completion: str) -> float:
-    """Log-likelihood of completion tokens given prompt (teacher-forced)."""
-    full = prompt + completion
-    enc_prompt = tok(prompt, return_tensors="pt")
-    enc_full = tok(full, return_tensors="pt")
-    enc_prompt = {k: v.to(model.device) for k, v in enc_prompt.items()}
-    enc_full = {k: v.to(model.device) for k, v in enc_full.items()}
-    prompt_len = enc_prompt["input_ids"].shape[1]
-    full_ids = enc_full["input_ids"]
-    if full_ids.shape[1] <= prompt_len:
-        return float("-inf")
-    with torch.inference_mode():
-        outputs = model(**enc_full)
-        logits = outputs.logits  # [1, seq, vocab]
-    # Score completion tokens: token at t predicted by logits at t-1.
-    target_ids = full_ids[0, prompt_len:]
-    pred_logits = logits[0, prompt_len - 1 : full_ids.shape[1] - 1, :]
-    log_probs = torch.log_softmax(pred_logits, dim=-1)
-    token_lp = log_probs.gather(1, target_ids.unsqueeze(1)).squeeze(1)
-    return float(token_lp.sum().item())
+class VLLMBackend:
+    """Caches one vLLM LLM instance per loop count (hf_overrides)."""
+
+    name = "vllm"
+
+    def __init__(
+        self,
+        model_name: str,
+        max_model_len: int = 4096,
+        gpu_memory_utilization: float = 0.85,
+    ):
+        ensure_vllm()
+        self.model_name = model_name
+        self.max_model_len = max_model_len
+        self.gpu_memory_utilization = gpu_memory_utilization
+        self._llms: Dict[int, Any] = {}
+
+    def get_llm(self, loops: int) -> Any:
+        loops = int(loops)
+        if loops not in self._llms:
+            from vllm import LLM
+
+            self._llms[loops] = LLM(
+                model=self.model_name,
+                dtype="auto",
+                hf_overrides={
+                    "n_recurrent_loops": loops,
+                    "recurrent_kv_cache_mode": "last_loop",
+                },
+                max_model_len=self.max_model_len,
+                gpu_memory_utilization=self.gpu_memory_utilization,
+                trust_remote_code=True,
+            )
+        return self._llms[loops]
+
+    def generate(self, prompt: str, max_new_tokens: int, loops: int) -> Dict[str, Any]:
+        from vllm import SamplingParams
+
+        llm = self.get_llm(loops)
+        sp = SamplingParams(max_tokens=max_new_tokens, temperature=0.0)
+        t0 = time.time()
+        out = llm.generate([prompt], sp)
+        dt = time.time() - t0
+        choice = out[0].outputs[0]
+        text = (choice.text or "").strip()
+        token_ids = getattr(choice, "token_ids", None) or []
+        ntok = len(token_ids)
+        return {"text": text, "ntok": int(ntok), "dt": dt}
+
+
+# -----------------------------
+# Verification (yes/no with logprobs)
+# -----------------------------
+
+_YES_TOKENS = {"yes", "Yes", "YES", " yes", " Yes", "YES", " y", "y", "Y"}
+_NO_TOKENS = {"no", "No", "NO", " no", " No", "NO", " n", "n", "N"}
+
+
+def _best_logprob(token_logprobs: Optional[Dict[Any, Any]], candidates: set[str]) -> Optional[float]:
+    if not token_logprobs:
+        return None
+    best: Optional[float] = None
+    for key, lp_obj in token_logprobs.items():
+        tok = getattr(lp_obj, "decoded_token", None)
+        if tok is None and isinstance(key, str):
+            tok = key
+        if tok is None:
+            continue
+        # Normalize common whitespace variants but keep exact candidates too.
+        if tok in candidates or tok.strip() in {c.strip() for c in candidates}:
+            lp = getattr(lp_obj, "logprob", None)
+            if lp is None:
+                continue
+            lp_f = float(lp)
+            if best is None or lp_f > best:
+                best = lp_f
+    return best
+
+
+def _fallback_yes_no(generated_text: str) -> Tuple[float, float, str]:
+    t = (generated_text or "").strip().lower()
+    # Match explicit leading yes/no to avoid picking up "no" inside other words.
+    if re.match(r"^yes\b", t):
+        return 0.0, -10.0, "yes"
+    if re.match(r"^no\b", t):
+        return -10.0, 0.0, "no"
+    if "yes" in t and "no" not in t:
+        return -1.0, -5.0, "yes"
+    if "no" in t and "yes" not in t:
+        return -5.0, -1.0, "no"
+    return -5.0, -5.0, "no"
 
 
 def verify_candidate(
-    model: Any,
-    tok: Any,
+    backend: VLLMBackend,
     question: str,
     candidate: str,
-    loops: Optional[int] = None,
+    loops: int,
 ) -> Dict[str, Any]:
     """Score candidate with a yes/no verification prompt.
 
-    Primary score is margin: log P(' yes') - log P(' no') on the same prompt.
-    Also returns both log-likelihoods.
+    Uses generated yes/no with vLLM logprobs when available. Falls back to
+    prompt-text parsing. Returns margin = log P(yes) - log P(no) over the
+    yes/no pair for compatibility with downstream selection/metrics.
     """
-    if loops is not None:
-        set_loop_count(model, loops)
     prompt = (
         "You are a strict verifier. Judge whether the proposed answer is correct.\n"
         f"Question: {question}\n"
         f"Proposed answer: {candidate}\n"
         "Is the proposed answer correct? Answer yes or no:"
     )
-    lp_yes = token_logprob_for_completion(model, tok, prompt, " yes")
-    lp_no = token_logprob_for_completion(model, tok, prompt, " no")
-    margin = lp_yes - lp_no
-    # Convert to a stable probability-like score for reporting.
-    # P(yes) over {yes,no} by softmax of the two completions.
+    from vllm import SamplingParams
+
+    llm = backend.get_llm(loops)
+    sp = SamplingParams(max_tokens=4, temperature=0.0, logprobs=20)
+    out = llm.generate([prompt], sp)[0]
+    choice = out.outputs[0]
+    gen_text = (choice.text or "").strip()
+    gen_logprobs = getattr(choice, "logprobs", None) or []
+    first = gen_logprobs[0] if gen_logprobs else None
+    lp_yes = _best_logprob(first, _YES_TOKENS)
+    lp_no = _best_logprob(first, _NO_TOKENS)
+    if lp_yes is None or lp_no is None:
+        lp_yes, lp_no, verdict = _fallback_yes_no(gen_text)
+    else:
+        verdict = "yes" if lp_yes >= lp_no else "no"
+    margin = float(lp_yes - lp_no)
     m = max(lp_yes, lp_no)
-    p_yes = math.exp(lp_yes - m) / (math.exp(lp_yes - m) + math.exp(lp_no - m))
-    verdict = "yes" if lp_yes >= lp_no else "no"
+    try:
+        p_yes = math.exp(lp_yes - m) / (math.exp(lp_yes - m) + math.exp(lp_no - m))
+    except Exception:
+        p_yes = 0.5
     return {
-        "lp_yes": lp_yes,
-        "lp_no": lp_no,
+        "lp_yes": float(lp_yes),
+        "lp_no": float(lp_no),
         "margin": margin,
-        "p_yes_pair": p_yes,
+        "p_yes_pair": float(p_yes),
         "verdict": verdict,
         "verifier_prompt": prompt,
+        "verifier_text": gen_text,
     }
 
 
@@ -265,7 +297,6 @@ def build_suite(limit: int) -> List[Dict[str, str]]:
 def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
     if args.seed is not None:
         random.seed(args.seed)
-        torch.manual_seed(args.seed)
 
     loop_values = list(args.loops) if args.loops else [1, 2, 3, 4]
     n_candidates = min(args.n_candidates, len(loop_values))
@@ -277,8 +308,11 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
     records: List[Dict[str, Any]] = []
     summary_counts = Counter()
 
-    # Single model instance; loop count is switched per operation.
-    model, tok = load_model(args.model, loops=candidate_loops[0])
+    backend = VLLMBackend(
+        args.model,
+        max_model_len=getattr(args, "max_model_len", 4096),
+        gpu_memory_utilization=getattr(args, "gpu_memory_utilization", 0.85),
+    )
 
     for i, ex in enumerate(suite):
         question = ex["question"]
@@ -287,7 +321,7 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
 
         candidates: List[Dict[str, Any]] = []
         for j, L in enumerate(candidate_loops):
-            gen = greedy_generate(model, tok, prompt, args.max_new_tokens, loops=L)
+            gen = backend.generate(prompt, args.max_new_tokens, loops=L)
             cand = {
                 "index": j,
                 "loops": L,
@@ -296,7 +330,7 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
                 "ntok": gen["ntok"],
                 "dt": gen["dt"],
             }
-            ver = verify_candidate(model, tok, question, gen["text"], loops=verifier_loop)
+            ver = verify_candidate(backend, question, gen["text"], loops=verifier_loop)
             cand["verify"] = ver
             candidates.append(cand)
 
@@ -309,7 +343,7 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
                 baseline = {"text": c["text"], "normalized": c["normalized"], "loops": c["loops"]}
                 break
         if baseline is None:
-            gen_b = greedy_generate(model, tok, prompt, args.max_new_tokens, loops=baseline_loop)
+            gen_b = backend.generate(prompt, args.max_new_tokens, loops=baseline_loop)
             baseline = {
                 "text": gen_b["text"],
                 "normalized": normalize_answer(gen_b["text"]),
@@ -357,9 +391,7 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
                 f"q={question[:60]}",
                 flush=True,
             )
-        if torch.cuda.is_available():
-            gc.collect()
-            torch.cuda.empty_cache()
+        gc.collect()
 
     n = max(1, summary_counts["n"])
     summary = {
@@ -382,7 +414,7 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
 
     return {
         "experiment": "E9_dory_verifier_self_consistency",
-        "backend": "transformers",
+        "backend": "vllm",
         "deterministic_greedy": True,
         "args": {
             "model": args.model,
@@ -391,6 +423,8 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
             "n_candidates": args.n_candidates,
             "limit": args.limit,
             "max_new_tokens": args.max_new_tokens,
+            "max_model_len": getattr(args, "max_model_len", 4096),
+            "gpu_memory_utilization": getattr(args, "gpu_memory_utilization", 0.85),
             "seed": args.seed,
         },
         "summary": summary,
@@ -405,11 +439,12 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
 def render_markdown(result: Dict[str, Any]) -> str:
     s = result["summary"]
     acc = s["accuracy"]
+    backend = result.get("backend", "vllm")
     lines: List[str] = []
     lines.append("# E9: Dory-as-verifier self-consistency")
     lines.append("")
     lines.append(f"- Model: `{s['model']}`")
-    lines.append(f"- Backend: `transformers` (deterministic greedy)")
+    lines.append(f"- Backend: `{backend}` (deterministic greedy)")
     lines.append(f"- Candidate loops: `{s['candidate_loops']}`")
     lines.append(f"- Verifier loop: `{s['verifier_loop']}`")
     lines.append(f"- Single-loop baseline: `{s['single_loop_baseline']}`")
@@ -418,13 +453,14 @@ def render_markdown(result: Dict[str, Any]) -> str:
     lines.append("## Accuracy comparison")
     lines.append("")
     lines.append(f"- Self-consistency (majority vote): **{acc['majority_vote']:.3f}** ({s['correct_counts']['majority_vote']}/{s['n']})")
-    lines.append(f"- Verifier-selected (yes/no log-likelihood): **{acc['verifier_selected']:.3f}** ({s['correct_counts']['verifier_selected']}/{s['n']})")
+    lines.append(f"- Verifier-selected (yes/no score): **{acc['verifier_selected']:.3f}** ({s['correct_counts']['verifier_selected']}/{s['n']})")
     lines.append(f"- Single {s['single_loop_baseline']}-loop baseline: **{acc['single_loop_baseline']:.3f}** ({s['correct_counts']['single_loop_baseline']}/{s['n']})")
     lines.append("")
     lines.append("## Notes")
     lines.append("")
-    lines.append("- Candidates are generated greedily at the specified loop counts; each candidate is scored by a yes/no verification prompt.")
-    lines.append("- Verifier score uses `log P(' yes') - log P(' no')` (teacher-forced completion log-likelihood margin).")
+    lines.append("- Candidates are generated greedily at the specified loop counts via vLLM with `hf_overrides.n_recurrent_loops`.")
+    lines.append("- Each candidate is scored by a yes/no verification prompt. The verifier generates a yes/no answer and uses vLLM logprobs for yes/no when available; it falls back to parsing the generated verdict.")
+    lines.append("- Verifier score is reported as `margin = log P(yes) - log P(no)` over the yes/no pair.")
     lines.append("- Majority vote normalizes answers (case/punctuation/short numeric extraction) before counting support.")
     lines.append("")
     lines.append("## Sample cases")
@@ -463,13 +499,15 @@ def save_outputs(result: Dict[str, Any], out_dir: str) -> Tuple[str, str]:
 
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="E9: Dory-as-verifier self-consistency")
-    p.add_argument("--model", default=DEFAULT_MODEL, help="Transformers/Dory model name or path")
+    p.add_argument("--model", default=DEFAULT_MODEL, help="vLLM/Dory model name or path")
     p.add_argument("--out", default="results/e9", help="Output directory for JSON and markdown")
     p.add_argument("--loops", nargs="+", type=int, default=[1, 2, 3, 4], help="Loop counts used as candidate generators")
     p.add_argument("--n-candidates", type=int, default=4, help="Number of loop candidates to use (from --loops order)")
     p.add_argument("--limit", type=int, default=50, help="Number of suite cases to evaluate")
     p.add_argument("--max-new-tokens", type=int, default=96, help="Max new tokens for candidate generation")
-    p.add_argument("--seed", type=int, default=42, help="Random/torch seed (deterministic greedy still used)")
+    p.add_argument("--max-model-len", type=int, default=4096, help="vLLM max_model_len")
+    p.add_argument("--gpu-memory-utilization", type=float, default=0.85, help="vLLM gpu_memory_utilization")
+    p.add_argument("--seed", type=int, default=42, help="Random seed (deterministic greedy decoding)")
     args = p.parse_args(argv)
     if args.n_candidates < 1:
         p.error("--n-candidates must be >= 1")

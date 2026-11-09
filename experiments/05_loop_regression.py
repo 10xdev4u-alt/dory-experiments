@@ -14,9 +14,21 @@ import math
 import os
 import random
 import re
+import subprocess
+import sys
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+
+
+def ensure_vllm():
+    try:
+        import vllm
+        return
+    except Exception:
+        os.environ["VLLM_USE_PRECOMPILED"] = "1"
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-q",
+                               "git+https://github.com/vllm-project/vllm.git@refs/pull/60149/head"])
 
 
 @dataclass
@@ -96,7 +108,7 @@ PROMPT_SETS: Dict[str, List[PromptCase]] = {
 class BaseBackend:
     name = "base"
 
-    def generate(self, prompt: str, loop: int, max_new_tokens: int = 128) -> str:
+    def generate(self, prompt: str, loop: int, max_new_tokens: int = 128) -> Any:
         raise NotImplementedError
 
 
@@ -144,58 +156,45 @@ class MockBackend(BaseBackend):
         return filler[: max_new_tokens * 4]
 
 
-class TransformersBackend(BaseBackend):
-    name = "transformers"
+class VLLMBackend(BaseBackend):
+    name = "vllm"
 
     def __init__(self, model_name: str, max_new_tokens: int = 128):
-        try:
-            import torch
-            try:
-                import transformers.configuration_utils as _cu
-                if "mlp" not in getattr(_cu, "ALLOWED_ATTN_LAYER_TYPES", ()):
-                    _cu.ALLOWED_ATTN_LAYER_TYPES = _cu.ALLOWED_ATTN_LAYER_TYPES + ("mlp",)
-            except Exception:
-                pass
-            from transformers import AutoModelForCausalLM, AutoTokenizer
-        except Exception as exc:  # pragma: no cover - runtime dependency
-            raise RuntimeError(
-                "Transformers backend requires transformers and torch. "
-                "Install them or run without --model to use the mock backend."
-            ) from exc
-
-        self.torch = torch
+        ensure_vllm()
+        self.model_name = model_name
         self.max_new_tokens = max_new_tokens
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
-        self.model.eval()
-        if self.tokenizer.pad_token_id is None and self.tokenizer.eos_token_id is not None:
-            self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+        self._llms: Dict[int, Any] = {}
 
-    def generate(self, prompt: str, loop: int, max_new_tokens: int = 128) -> str:
-        # Deterministic greedy decode. Loop count is injected as a controlled prefix
-        # to exercise iterative prompting/regression sensitivity with the same model.
-        # Apply Dory recurrent loop count to the model when supported.
-        if hasattr(self.model, "config") and hasattr(self.model.config, "n_recurrent_loops"):
-            self.model.config.n_recurrent_loops = int(loop)
-        if hasattr(self.model, "set_num_loops"):
-            self.model.set_num_loops(int(loop))
+    def _get_llm(self, loop: int):
+        loop = int(loop)
+        if loop not in self._llms:
+            from vllm import LLM
+            self._llms[loop] = LLM(
+                model=self.model_name,
+                dtype="auto",
+                hf_overrides={
+                    "n_recurrent_loops": loop,
+                    "recurrent_kv_cache_mode": "last_loop",
+                },
+                max_model_len=4096,
+                gpu_memory_utilization=0.85,
+                trust_remote_code=True,
+            )
+        return self._llms[loop]
+
+    def generate(self, prompt: str, loop: int, max_new_tokens: int = 128) -> Tuple[str, int]:
+        from vllm import SamplingParams
+
+        llm = self._get_llm(loop)
         loop_prompt = (
             f"You are on refinement loop {loop}. Follow instructions exactly.\n"
             f"Previous refinement passes: {max(0, loop - 1)}.\n\n{prompt}"
         )
-        inputs = self.tokenizer(loop_prompt, return_tensors="pt")
-        with self.torch.no_grad():
-            out = self.model.generate(
-                **inputs,
-                do_sample=False,
-                num_beams=1,
-                max_new_tokens=max_new_tokens,
-                pad_token_id=self.tokenizer.pad_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
-            )
-        gen_ids = out[0][inputs["input_ids"].shape[1]:]
-        text = self.tokenizer.decode(gen_ids, skip_special_tokens=True).strip()
-        return text
+        sp = SamplingParams(max_tokens=max_new_tokens, temperature=0.0)
+        out = llm.generate([loop_prompt], sp)
+        text = out[0].outputs[0].text.strip()
+        ntok = len(out[0].outputs[0].token_ids)
+        return text, ntok
 
 
 def normalize_text(text: str) -> str:
@@ -268,7 +267,7 @@ def max_token_hit_rate(text: str, max_new_tokens: int) -> float:
 
 def build_backend(args: argparse.Namespace) -> BaseBackend:
     if args.model:
-        return TransformersBackend(args.model, max_new_tokens=args.max_new_tokens)
+        return VLLMBackend(args.model, max_new_tokens=args.max_new_tokens)
     return MockBackend()
 
 
@@ -289,7 +288,12 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
     for case in cases:
         per_loop: Dict[int, Dict[str, Any]] = {}
         for loop in loops:
-            output = backend.generate(case.prompt, loop=loop, max_new_tokens=args.max_new_tokens)
+            result = backend.generate(case.prompt, loop=loop, max_new_tokens=args.max_new_tokens)
+            if isinstance(result, tuple):
+                output, token_count = result
+            else:
+                output = result
+                token_count = len(re.findall(r"\w+|[^\w\s]", output))
             correct, format_valid = evaluate_case(case, output)
             r4 = repeat_4gram_rate(output)
             ent = entropy_proxy(output)
@@ -297,6 +301,7 @@ def run_experiment(args: argparse.Namespace) -> Dict[str, Any]:
             row = {
                 "loop": loop,
                 "output": output,
+                "token_count": token_count,
                 "correct": correct,
                 "format_valid": format_valid,
                 "repeat_4gram_rate": r4,
@@ -497,7 +502,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--out", default="e5_loop_regression_output", help="Output directory for JSON and markdown summary")
     parser.add_argument("--loops", type=int, default=4, help="Maximum loop count to test (starts at 1)")
     parser.add_argument("--limit", type=int, default=0, help="Limit cases per prompt set (0 means all)")
-    parser.add_argument("--model", default=None, help="Transformers model name/path; if omitted uses mock backend")
+    parser.add_argument("--model", default=None, help="vLLM model name/path; if omitted uses mock backend")
     parser.add_argument("--max-new-tokens", type=int, default=128, help="Max new tokens for generation")
     args = parser.parse_args(argv)
     if args.loops < 1:
