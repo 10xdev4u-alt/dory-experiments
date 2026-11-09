@@ -1,0 +1,46 @@
+{
+  "config": {
+    "out": "/kaggle/working/results/e5_hard_loop",
+    "loops": [
+      2,
+      4
+    ],
+    "limit": 100,
+    "max_tokens_math": 512,
+    "max_tokens_bbh": 256,
+    "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+    "total_prompts": 200
+  },
+  "per_loop": {
+    "2": {
+      "n_loops": 2,
+      "accuracy": 0.225,
+      "correct": 45,
+      "total": 200,
+      "output_tokens": 102191,
+      "rep_rate": 0.4687613268137818,
+      "throughput_prompts_per_s": 0.3464417498674904,
+      "throughput_tokens_per_s": 177.01614430354354,
+      "time_s": 577.2976267337799
+    },
+    "4": {
+      "n_loops": 4,
+      "accuracy": 0.18,
+      "correct": 36,
+      "total": 200,
+      "output_tokens": 102274,
+      "rep_rate": 0.4683412225081978,
+      "throughput_prompts_per_s": 0.20290190415515355,
+      "throughput_tokens_per_s": 103.75794672782087,
+      "time_s": 985.6979944705963
+    }
+  },
+  "oracle_accuracy": 0.335,
+  "oracle_correct": 67,
+  "loop_gain": -0.04500000000000001,
+  "oracle_gain": 0.11000000000000001,
+  "improvement_rate": 0.11,
+  "degradation_rate": 0.155,
+  "improved": 22,
+  "degraded": 31
+}
