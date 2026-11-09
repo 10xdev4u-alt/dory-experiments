@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "experiment": "E7_quant_ladder",
+    "backend": "vllm",
+    "device": "Tesla T4 cc=[7, 5]",
+    "nvfp4_supported": false,
+    "modes": [
+      "fp16",
+      "bnb_8bit",
+      "bnb_4bit"
+    ],
+    "tiny_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "dory_model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+    "limit": 50,
+    "vllm_ref": "git+https://github.com/vllm-project/vllm.git@refs/pull/60149/head",
+    "vllm_use_precompiled": "1",
+    "nvfp4_note": "NVFP4 unsupported on this device (SM7.5/T4 expected)."
+  },
+  "results": [
+    {
+      "stage": "tinyllama_speed_gate",
+      "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "mode": "fp16",
+      "loops": null,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    },
+    {
+      "stage": "tinyllama_speed_gate",
+      "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "mode": "bnb_8bit",
+      "loops": null,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    },
+    {
+      "stage": "tinyllama_speed_gate",
+      "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "mode": "bnb_4bit",
+      "loops": null,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    },
+    {
+      "stage": "dory_ladder",
+      "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "mode": "fp16",
+      "loops": 1,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/convert_frame.py\", line 61, in <module>\n    from torch._dynamo.distributed import get_compile_pg\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    },
+    {
+      "stage": "dory_ladder",
+      "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "mode": "fp16",
+      "loops": 4,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/convert_frame.py\", line 61, in <module>\n    from torch._dynamo.distributed import get_compile_pg\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    },
+    {
+      "stage": "dory_ladder",
+      "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "mode": "bnb_8bit",
+      "loops": 1,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/convert_frame.py\", line 61, in <module>\n    from torch._dynamo.distributed import get_compile_pg\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    },
+    {
+      "stage": "dory_ladder",
+      "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "mode": "bnb_8bit",
+      "loops": 4,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/convert_frame.py\", line 61, in <module>\n    from torch._dynamo.distributed import get_compile_pg\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    },
+    {
+      "stage": "dory_ladder",
+      "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "mode": "bnb_4bit",
+      "loops": 1,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/convert_frame.py\", line 61, in <module>\n    from torch._dynamo.distributed import get_compile_pg\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    },
+    {
+      "stage": "dory_ladder",
+      "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "mode": "bnb_4bit",
+      "loops": 4,
+      "status": "error",
+      "weights_gb": null,
+      "tok_per_s": null,
+      "accuracy": null,
+      "rep_rate": null,
+      "max_context": null,
+      "n_prompts": 0,
+      "nvfp4_supported": false,
+      "slower_than_2x": null,
+      "speed_ratio_vs_fp16": null,
+      "errors": [
+        "TypeError: Config() got an unexpected keyword argument 'deprecated'"
+      ],
+      "notes": [],
+      "details": {
+        "traceback_tail": "  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/convert_frame.py\", line 61, in <module>\n    from torch._dynamo.distributed import get_compile_pg\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/distributed.py\", line 19, in <module>\n    from . import config\n  File \"/usr/local/lib/python3.13/dist-packages/torch/_dynamo/config.py\", line 126, in <module>\n    skip_code_recursive_on_recompile_limit_hit: bool = Config(\n                                                       ~~~~~~^\n        default=True, deprecated=True, deprecation_message=\"does not do anything\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nTypeError: Config() got an unexpected keyword argument 'deprecated'"
+      }
+    }
+  ]
+}
