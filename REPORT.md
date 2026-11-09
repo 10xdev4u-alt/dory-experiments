@@ -62,9 +62,9 @@ NVFP4 unsupported on T4 (SM7.5); tensor-core dequant requires Blackwell (SM100+)
 
 Interpretation: More loops hurt on average (negative loop gain), but oracle gain +11pt means a difficulty router could recover. Degradation exceeds improvement → loop regression is real and task-dependent.
 
-## 6. E6 — Context Ceiling (pending)
+## 6. E6 — Context Ceiling (env failure)
 
-Kernel queued on Kaggle; vLLM env fix applied. Awaiting run. Expected: 32K/64K/128K NIAH with last_loop vs per_loop, KV diagnostic.
+Rerun failed: max_model_len set equal to context (no output-token headroom) → "decoder prompt + output tokens > max_model_len"; 64K+ also hit engine init failures. Context feasibility already established by E2: ceiling = 64K on T4. last_loop vs per_loop mode comparison not yet obtained. Re-run needed with max_model_len = context + gen_tokens buffer and pinned env.
 
 ## 7. E7 — Quant Ladder
 
