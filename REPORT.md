@@ -51,20 +51,7 @@ E4 router (logistic regression on 5 prompt features, 5-fold CV) on E5 data: clas
 
 ## 5. E5 — Hard-Loop Benchmark
 
-200 prompts (GSM8K/MATH-500/BBH, 100 each, limit 100), loops 2 vs 4, greedy.
-
-| Loops | Acc | Output tokens | rep rate | tok/s |
-|---:|---:|---:|---:|---:|
-| 2 | 0.225 | 102191 | 0.469 | 177.0 |
-| 4 | 0.180 | 102274 | 0.468 | 103.8 |
-
-- Oracle accuracy: 0.335 (67/200)
-- Loop gain: -0.045
-- Oracle gain: +0.110
-- Improvement rate: 0.110 (22)
-- Degradation rate: 0.155 (31)
-
-Interpretation: More loops hurt on average (negative loop gain), but oracle gain +11pt means a difficulty router could recover. Degradation exceeds improvement → loop regression is real and task-dependent.
+Original graded: loop2 0.225 / loop4 0.180 / oracle 0.335. Re-extracted (E11): 0.460 / 0.465. 30/31 "degraded" cases are extraction artifacts. Content accuracy flat (126→131 present). Loop gain on content is ~0, not -0.045. Oracle gain +0.110 may also shrink under re-extraction.
 
 ## 6. E6 — Context Ceiling (env failure)
 
@@ -87,6 +74,10 @@ Loop regression is 100% format degradation (31/31 degraded): GSM8K answer repeat
 3. **Quantization:** blocked by env; NVFP4 dead on T4. Pursue FP16 baseline + INT8 via pinned vLLM.
 4. **Router (E4):** proceed — oracle gain ≥3pt threshold met.
 5. **Negative result:** more loops ≠ better quality on hard tasks; regression taxonomy (drift/over-correction) warranted.
+
+## 10. E11 — Extraction Fix
+
+Re-extracting with answer-position awareness lifts graded accuracy from 0.225→0.460 (loop2) and 0.180→0.465 (loop4). 30 of 31 "degraded" cases are extraction artifacts. Looping does not degrade content; extraction does. Invalidates E5 "loop regression" conclusion.
 
 ## 9. Reproducibility
 
